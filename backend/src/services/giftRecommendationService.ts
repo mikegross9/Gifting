@@ -1,0 +1,137 @@
+import Anthropic from '@anthropic-ai/sdk';
+import { GiftRecommendation } from '../types';
+
+export class GiftRecommendationService {
+  private client: Anthropic;
+
+  constructor() {
+    this.client = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY
+    });
+  }
+
+  async recommendGifts(params: {
+    recipientName: string;
+    relationship: string;
+    occasion: string;
+    age?: number;
+    preferences?: string;
+    budgetMin: number;
+    budgetMax: number;
+    previousGifts?: string[];
+  }): Promise<GiftRecommendation[]> {
+    const {
+      recipientName,
+      relationship,
+      occasion,
+      age,
+      preferences,
+      budgetMin,
+      budgetMax,
+      previousGifts = []
+    } = params;
+
+    const prompt = `Recommend 3 thoughtful gift ideas for:
+
+Recipient: ${recipientName}
+Relationship: ${relationship}
+Occasion: ${occasion}
+${age ? `Age: ${age}` : ''}
+${preferences ? `Preferences/Interests: ${preferences}` : ''}
+Budget: $${budgetMin} - $${budgetMax}
+${previousGifts.length > 0 ? `Previous gifts (avoid similar): ${previousGifts.join(', ')}` : ''}
+
+For each gift recommendation, provide:
+1. Gift name
+2. Brief description (1-2 sentences)
+3. Estimated price within budget
+4. Brief reasoning why this gift is appropriate
+
+Format your response as JSON array with this structure:
+[
+  {
+    "name": "Gift Name",
+    "description": "Description here",
+    "price": 49.99,
+    "reasoning": "Why this gift is great"
+  }
+]
+
+Only respond with the JSON array, nothing else.`;
+
+    try {
+      const message = await this.client.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1500,
+        messages: [{
+          role: 'user',
+          content: prompt
+        }]
+      });
+
+      const content = message.content[0];
+      if (content.type === 'text') {
+        const recommendations = JSON.parse(content.text.trim());
+        return recommendations.map((rec: any) => ({
+          name: rec.name,
+          description: rec.description,
+          price: rec.price,
+          url: this.generateMockProductUrl(rec.name),
+          imageUrl: this.generateMockImageUrl(rec.name),
+          reasoning: rec.reasoning
+        }));
+      }
+
+      throw new Error('Unexpected response format from AI');
+    } catch (error) {
+      console.error('Error generating gift recommendations:', error);
+
+      // Fallback recommendations
+      return this.getFallbackRecommendations(budgetMin, budgetMax, occasion);
+    }
+  }
+
+  private generateMockProductUrl(productName: string): string {
+    // In production, this would integrate with actual shopping APIs
+    const encodedName = encodeURIComponent(productName);
+    return `https://www.amazon.com/s?k=${encodedName}`;
+  }
+
+  private generateMockImageUrl(productName: string): string {
+    // In production, this would return actual product images
+    return `https://via.placeholder.com/400x400?text=${encodeURIComponent(productName)}`;
+  }
+
+  private getFallbackRecommendations(budgetMin: number, budgetMax: number, occasion: string): GiftRecommendation[] {
+    const avgBudget = (budgetMin + budgetMax) / 2;
+
+    return [
+      {
+        name: 'Gift Card',
+        description: 'A versatile gift card that lets them choose exactly what they want.',
+        price: avgBudget,
+        url: 'https://www.amazon.com/gift-cards',
+        imageUrl: 'https://via.placeholder.com/400x400?text=Gift+Card',
+        reasoning: 'Gift cards are always appreciated and allow the recipient to choose something they truly want.'
+      },
+      {
+        name: 'Personalized Photo Album',
+        description: 'A beautiful photo album to preserve precious memories.',
+        price: Math.min(avgBudget * 0.8, budgetMax),
+        url: 'https://www.amazon.com/s?k=photo+album',
+        imageUrl: 'https://via.placeholder.com/400x400?text=Photo+Album',
+        reasoning: 'Personal and thoughtful gift that celebrates your relationship and shared memories.'
+      },
+      {
+        name: 'Gourmet Gift Basket',
+        description: 'A curated selection of gourmet treats and snacks.',
+        price: Math.min(avgBudget * 1.1, budgetMax),
+        url: 'https://www.amazon.com/s?k=gift+basket',
+        imageUrl: 'https://via.placeholder.com/400x400?text=Gift+Basket',
+        reasoning: 'A delicious assortment that is perfect for any occasion and sure to be enjoyed.'
+      }
+    ];
+  }
+}
+
+export const giftRecommendationService = new GiftRecommendationService();
