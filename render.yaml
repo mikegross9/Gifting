@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: gift-planner-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install && npx prisma generate && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gift-planner-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+
+  - type: web
+    name: gift-planner-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://gift-planner-backend.onrender.com
+
+databases:
+  - name: gift-planner-db
+    plan: free
+    databaseName: gift_planner
+    user: gift_planner_user

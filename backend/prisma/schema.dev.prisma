@@ -1,0 +1,107 @@
+// SQLite version for local development
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contacts  Contact[]
+  gifts     Gift[]
+  settings  UserSettings?
+}
+
+model UserSettings {
+  id                    String  @id @default(cuid())
+  userId                String  @unique
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  approvalWindowDays    Int     @default(7)
+  autoSendEnabled       Boolean @default(true)
+  notificationsEnabled  Boolean @default(true)
+  defaultBudgetMin      Float   @default(25.0)
+  defaultBudgetMax      Float   @default(100.0)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Contact {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name         String
+  relationship String   // FAMILY, FRIEND, COLLEAGUE, OTHER
+  birthday     DateTime?
+  email        String?
+  phone        String?
+  address      String?
+
+  preferences  String?
+  notes        String?
+  budgetMin    Float?
+  budgetMax    Float?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  gifts        Gift[]
+  events       Event[]
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  contactId   String
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  type        String    // BIRTHDAY, MOTHERS_DAY, etc.
+  name        String
+  date        DateTime
+  recurring   Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  gifts       Gift[]
+}
+
+model Gift {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contactId       String
+  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  eventId         String?
+  event           Event?    @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  status          String    @default("PENDING_RECOMMENDATION")
+
+  name            String
+  description     String?
+  price           Float
+  url             String?
+  imageUrl        String?
+
+  cardMessage     String?
+
+  recommendedAt    DateTime @default(now())
+  approvalDeadline DateTime?
+  approvedAt       DateTime?
+  orderedAt        DateTime?
+  shippedAt        DateTime?
+  deliveredAt      DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
