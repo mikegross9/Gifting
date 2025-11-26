@@ -1,0 +1,23 @@
+[[services]]
+name = "backend"
+source = "backend"
+
+[services.build]
+builder = "NIXPACKS"
+buildCommand = "npm install && npx prisma generate && npm run build"
+
+[services.deploy]
+startCommand = "npm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[[services]]
+name = "frontend"
+source = "frontend"
+
+[services.build]
+builder = "NIXPACKS"
+buildCommand = "npm install && npm run build"
+
+[services.deploy]
+staticPublishPath = "dist"
