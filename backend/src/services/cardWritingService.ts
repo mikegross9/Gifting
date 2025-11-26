@@ -1,11 +1,11 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 
 export class CardWritingService {
-  private client: Anthropic;
+  private client: OpenAI;
 
   constructor() {
-    this.client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
     });
   }
 
@@ -37,21 +37,22 @@ Write a warm, sincere card message (2-4 sentences) that feels personal and genui
 Just provide the card message text, nothing else.`;
 
     try {
-      const message = await this.client.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 300,
+      const completion = await this.client.chat.completions.create({
+        model: 'gpt-4o-mini',
         messages: [{
           role: 'user',
           content: prompt
-        }]
+        }],
+        max_tokens: 300,
+        temperature: 0.8
       });
 
-      const content = message.content[0];
-      if (content.type === 'text') {
-        return content.text.trim();
+      const message = completion.choices[0]?.message?.content;
+      if (message) {
+        return message.trim();
       }
 
-      throw new Error('Unexpected response format from AI');
+      throw new Error('No response from OpenAI');
     } catch (error) {
       console.error('Error generating card message:', error);
 
