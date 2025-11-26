@@ -1,12 +1,18 @@
 import OpenAI from 'openai';
 
 export class CardWritingService {
-  private client: OpenAI;
+  private client: OpenAI | null;
 
   constructor() {
-    this.client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+    // Only initialize if API key is available
+    if (process.env.OPENAI_API_KEY) {
+      this.client = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+      });
+    } else {
+      console.warn('⚠️  OPENAI_API_KEY not set - using fallback card messages');
+      this.client = null;
+    }
   }
 
   async generateCardMessage(params: {
@@ -18,6 +24,11 @@ export class CardWritingService {
     tone?: 'formal' | 'casual' | 'heartfelt' | 'funny';
   }): Promise<string> {
     const { recipientName, relationship, occasion, giftDescription, senderName, tone = 'heartfelt' } = params;
+
+    // If no OpenAI client, use fallback
+    if (!this.client) {
+      return this.getFallbackMessage(recipientName, occasion, senderName, tone);
+    }
 
     const prompt = `Write a personalized greeting card message for the following:
 
@@ -55,10 +66,19 @@ Just provide the card message text, nothing else.`;
       throw new Error('No response from OpenAI');
     } catch (error) {
       console.error('Error generating card message:', error);
-
-      // Fallback message if AI service fails
-      return `Happy ${occasion}, ${recipientName}! Wishing you all the best. - ${senderName}`;
+      return this.getFallbackMessage(recipientName, occasion, senderName, tone);
     }
+  }
+
+  private getFallbackMessage(recipientName: string, occasion: string, senderName: string, tone: string): string {
+    const messages = {
+      heartfelt: `Dear ${recipientName}, wishing you a wonderful ${occasion} filled with joy and happiness. You mean so much to me! With love, ${senderName}`,
+      casual: `Hey ${recipientName}! Happy ${occasion}! Hope your day is amazing. - ${senderName}`,
+      funny: `${recipientName}, you're another year older... but who's counting? Have an awesome ${occasion}! - ${senderName}`,
+      formal: `Dear ${recipientName}, Please accept my warmest wishes for a happy ${occasion}. Best regards, ${senderName}`
+    };
+
+    return messages[tone as keyof typeof messages] || `Happy ${occasion}, ${recipientName}! Wishing you all the best. - ${senderName}`;
   }
 
   async generateMultipleOptions(params: {

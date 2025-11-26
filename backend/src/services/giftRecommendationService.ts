@@ -2,12 +2,18 @@ import OpenAI from 'openai';
 import { GiftRecommendation } from '../types';
 
 export class GiftRecommendationService {
-  private client: OpenAI;
+  private client: OpenAI | null;
 
   constructor() {
-    this.client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+    // Only initialize if API key is available
+    if (process.env.OPENAI_API_KEY) {
+      this.client = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+      });
+    } else {
+      console.warn('⚠️  OPENAI_API_KEY not set - using fallback gift recommendations');
+      this.client = null;
+    }
   }
 
   async recommendGifts(params: {
@@ -20,6 +26,12 @@ export class GiftRecommendationService {
     budgetMax: number;
     previousGifts?: string[];
   }): Promise<GiftRecommendation[]> {
+    // If no OpenAI client, use fallback immediately
+    if (!this.client) {
+      console.log('Using fallback recommendations (no OpenAI key)');
+      return this.getFallbackRecommendations(params.budgetMin, params.budgetMax, params.occasion);
+    }
+
     const {
       recipientName,
       relationship,
@@ -90,20 +102,16 @@ Only respond with the JSON array, nothing else.`;
       throw new Error('No response from OpenAI');
     } catch (error) {
       console.error('Error generating gift recommendations:', error);
-
-      // Fallback recommendations
       return this.getFallbackRecommendations(budgetMin, budgetMax, occasion);
     }
   }
 
   private generateMockProductUrl(productName: string): string {
-    // In production, this would integrate with actual shopping APIs
     const encodedName = encodeURIComponent(productName);
     return `https://www.amazon.com/s?k=${encodedName}`;
   }
 
   private generateMockImageUrl(productName: string): string {
-    // In production, this would return actual product images
     return `https://via.placeholder.com/400x400?text=${encodeURIComponent(productName)}`;
   }
 
