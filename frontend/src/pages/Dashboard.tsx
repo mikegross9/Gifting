@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, Gift, Users, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { giftsApi, eventsApi, contactsApi } from '../services/api';
-import { Gift as GiftType, Event, Contact } from '../types';
+import { Gift as GiftType, Event } from '../types';
 import Layout from '../components/Layout';
 
 export default function Dashboard() {
