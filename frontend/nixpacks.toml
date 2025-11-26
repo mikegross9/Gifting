@@ -8,4 +8,4 @@ cmds = ['npm install']
 cmds = ['npm run build']
 
 [start]
-cmd = 'npx vite preview --port $PORT --host'
+cmd = 'npx serve dist -p $PORT'
