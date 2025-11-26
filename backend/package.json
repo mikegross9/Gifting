@@ -21,7 +21,9 @@
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",
     "zod": "^3.22.4",
-    "@anthropic-ai/sdk": "^0.27.0"
+    "@anthropic-ai/sdk": "^0.27.0",
+    "prisma": "^5.7.1",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -30,8 +32,6 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.10.6",
     "@types/node-cron": "^3.0.11",
-    "prisma": "^5.7.1",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "tsx": "^4.7.0"
   }
 }
