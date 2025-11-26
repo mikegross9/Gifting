@@ -5,7 +5,7 @@ nixPkgs = ['nodejs_18']
 cmds = ['npm install']
 
 [phases.build]
-cmds = ['npm run build']
+cmds = ['npm run build', 'ls -la', 'ls -la dist || echo "dist folder not created"']
 
 [start]
-cmd = 'npx serve dist -p $PORT'
+cmd = 'node server.js'
