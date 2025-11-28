@@ -27,7 +27,7 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://gift-planner-backend.onrender.com
+        value: https://gifting-backend-wdyz.onrender.com
 
 databases:
   - name: gift-planner-db
