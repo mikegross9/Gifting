@@ -11,6 +11,16 @@ import { schedulingService } from './services/schedulingService';
 // Load environment variables
 dotenv.config();
 
+// Log environment status
+console.log('==== Backend Server Starting ====');
+console.log('Node version:', process.version);
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('PORT:', process.env.PORT || '3001 (default)');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? '✓ Set' : '✗ NOT SET');
+console.log('OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '✓ Set' : '✗ NOT SET');
+console.log('JWT_SECRET:', process.env.JWT_SECRET ? '✓ Set' : '✗ NOT SET');
+console.log('=================================');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -34,8 +44,10 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('=================================');
+  console.log(`✓ Server running on port ${PORT}`);
+  console.log(`✓ API ready at http://localhost:${PORT}`);
+  console.log('=================================');
 
   // Start scheduling service
   schedulingService.start();
