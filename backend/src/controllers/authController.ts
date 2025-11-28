@@ -5,13 +5,19 @@ import { authService } from '../services/authService';
 export class AuthController {
   async register(req: AuthRequest, res: Response) {
     try {
+      console.log('=== REGISTRATION REQUEST ===');
+      console.log('Body:', JSON.stringify(req.body));
+
       const { email, password, name } = req.body;
 
       if (!email || !password || !name) {
+        console.log('Missing required fields - email:', !!email, 'password:', !!password, 'name:', !!name);
         return res.status(400).json({ error: 'Email, password, and name are required' });
       }
 
+      console.log('Attempting to register user:', email);
       const result = await authService.register({ email, password, name });
+      console.log('Registration successful for:', email);
 
       res.status(201).json(result);
     } catch (error) {
