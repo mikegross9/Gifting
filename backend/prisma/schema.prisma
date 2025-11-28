@@ -1,11 +1,13 @@
-// SQLite version for local development
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -26,8 +28,8 @@ model UserSettings {
   userId                String  @unique
   user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  approvalWindowDays    Int     @default(7)
-  autoSendEnabled       Boolean @default(true)
+  approvalWindowDays    Int     @default(7) // Days before event to request approval
+  autoSendEnabled       Boolean @default(true) // Auto-send if not approved
   notificationsEnabled  Boolean @default(true)
   defaultBudgetMin      Float   @default(25.0)
   defaultBudgetMax      Float   @default(100.0)
@@ -36,28 +38,47 @@ model UserSettings {
   updatedAt             DateTime @updatedAt
 }
 
+enum RelationshipType {
+  FAMILY
+  FRIEND
+  COLLEAGUE
+  OTHER
+}
+
 model Contact {
-  id           String   @id @default(cuid())
+  id           String           @id @default(cuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name         String
-  relationship String   // FAMILY, FRIEND, COLLEAGUE, OTHER
+  relationship RelationshipType
   birthday     DateTime?
   email        String?
   phone        String?
   address      String?
 
-  preferences  String?
+  preferences  String? // JSON string of gift preferences
   notes        String?
   budgetMin    Float?
   budgetMax    Float?
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
   gifts        Gift[]
   events       Event[]
+
+  @@index([userId])
+}
+
+enum EventType {
+  BIRTHDAY
+  MOTHERS_DAY
+  FATHERS_DAY
+  VALENTINES_DAY
+  CHRISTMAS
+  ANNIVERSARY
+  CUSTOM
 }
 
 model Event {
@@ -65,27 +86,42 @@ model Event {
   contactId   String
   contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
-  type        String    // BIRTHDAY, MOTHERS_DAY, etc.
+  type        EventType
   name        String
   date        DateTime
-  recurring   Boolean   @default(false)
+  recurring   Boolean   @default(false) // Annual recurrence
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   gifts       Gift[]
+
+  @@index([contactId])
+  @@index([date])
+}
+
+enum GiftStatus {
+  PENDING_RECOMMENDATION
+  PENDING_APPROVAL
+  APPROVED
+  MODIFIED
+  REJECTED
+  ORDERED
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model Gift {
-  id              String    @id @default(cuid())
+  id              String      @id @default(cuid())
   userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   contactId       String
-  contact         Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contact         Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
   eventId         String?
-  event           Event?    @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  event           Event?      @relation(fields: [eventId], references: [id], onDelete: SetNull)
 
-  status          String    @default("PENDING_RECOMMENDATION")
+  status          GiftStatus  @default(PENDING_RECOMMENDATION)
 
   name            String
   description     String?
@@ -93,15 +129,20 @@ model Gift {
   url             String?
   imageUrl        String?
 
-  cardMessage     String?
+  cardMessage     String?     // AI-generated card message
 
-  recommendedAt    DateTime @default(now())
-  approvalDeadline DateTime?
-  approvedAt       DateTime?
-  orderedAt        DateTime?
-  shippedAt        DateTime?
-  deliveredAt      DateTime?
+  recommendedAt   DateTime    @default(now())
+  approvalDeadline DateTime?  // Deadline for user to approve
+  approvedAt      DateTime?
+  orderedAt       DateTime?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([contactId])
+  @@index([status])
+  @@index([approvalDeadline])
 }
