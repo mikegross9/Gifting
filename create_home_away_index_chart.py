@@ -11,26 +11,29 @@ import numpy as np
 # Read the data
 df = pd.read_csv('nfl_team_season_home_away_2004_2024.csv')
 
-# Calculate home and away win percentages for each team-season
-df['home_games'] = df['home_wins'] + df['home_losses'] + df['home_ties']
-df['away_games'] = df['away_wins'] + df['away_losses'] + df['away_ties']
-df['home_win_pct'] = (df['home_wins'] + 0.5 * df['home_ties']) / df['home_games']
-df['away_win_pct'] = (df['away_wins'] + 0.5 * df['away_ties']) / df['away_games']
-
-# Calculate the home/away index for each team-season
-# For seasons where away_win_pct is 0, the index is undefined (division by zero)
-# We'll exclude those seasons from the average calculation
-df['home_away_index'] = df.apply(
-    lambda row: row['home_win_pct'] / row['away_win_pct'] if row['away_win_pct'] > 0 else None,
-    axis=1
-)
-
-# Calculate average index for each team across all seasons (excluding None values)
-team_index = df.groupby('team').agg({
-    'home_away_index': lambda x: x.dropna().mean(),
-    'home_win_pct': 'mean',
-    'away_win_pct': 'mean'
+# Sum up total wins/losses/ties across all seasons for each team
+team_totals = df.groupby('team').agg({
+    'home_wins': 'sum',
+    'home_losses': 'sum',
+    'home_ties': 'sum',
+    'away_wins': 'sum',
+    'away_losses': 'sum',
+    'away_ties': 'sum'
 }).reset_index()
+
+# Calculate total home and away games
+team_totals['home_games'] = team_totals['home_wins'] + team_totals['home_losses'] + team_totals['home_ties']
+team_totals['away_games'] = team_totals['away_wins'] + team_totals['away_losses'] + team_totals['away_ties']
+
+# Calculate overall home and away win percentages
+team_totals['home_win_pct'] = (team_totals['home_wins'] + 0.5 * team_totals['home_ties']) / team_totals['home_games']
+team_totals['away_win_pct'] = (team_totals['away_wins'] + 0.5 * team_totals['away_ties']) / team_totals['away_games']
+
+# Calculate the home/away index
+team_totals['home_away_index'] = team_totals['home_win_pct'] / team_totals['away_win_pct']
+
+# Rename for consistency with rest of code
+team_index = team_totals[['team', 'home_away_index', 'home_win_pct', 'away_win_pct']].copy()
 
 # Sort by index
 team_index = team_index.sort_values('home_away_index', ascending=False)
