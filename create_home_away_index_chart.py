@@ -18,13 +18,16 @@ df['home_win_pct'] = (df['home_wins'] + 0.5 * df['home_ties']) / df['home_games'
 df['away_win_pct'] = (df['away_wins'] + 0.5 * df['away_ties']) / df['away_games']
 
 # Calculate the home/away index for each team-season
-# For seasons where away_win_pct is 0, use a minimum value of 0.05 to avoid extreme outliers
-df['away_win_pct_adjusted'] = df['away_win_pct'].clip(lower=0.05)
-df['home_away_index'] = df['home_win_pct'] / df['away_win_pct_adjusted']
+# For seasons where away_win_pct is 0, the index is undefined (division by zero)
+# We'll exclude those seasons from the average calculation
+df['home_away_index'] = df.apply(
+    lambda row: row['home_win_pct'] / row['away_win_pct'] if row['away_win_pct'] > 0 else None,
+    axis=1
+)
 
-# Calculate average index for each team across all seasons
+# Calculate average index for each team across all seasons (excluding None values)
 team_index = df.groupby('team').agg({
-    'home_away_index': 'mean',
+    'home_away_index': lambda x: x.dropna().mean(),
     'home_win_pct': 'mean',
     'away_win_pct': 'mean'
 }).reset_index()
