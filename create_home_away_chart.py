@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Create bar chart of NFL team home vs away win percentages 2004-2024
+Create bar chart of NFL team home vs away win percentages 2004-2025
 """
 
 import pandas as pd
@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Read the data
-df = pd.read_csv('nfl_team_season_home_away_2004_2024.csv')
+df = pd.read_csv('nfl_team_season_home_away_2004_2025.csv')
 
 # Calculate home and away win percentages for each team-season
 df['home_games'] = df['home_wins'] + df['home_losses'] + df['home_ties']
@@ -51,15 +51,15 @@ ax.set_yticks(x)
 ax.set_yticklabels(team_avg['team'])
 ax.set_xlabel('Win Percentage', fontsize=12, fontweight='bold')
 ax.set_ylabel('Team', fontsize=12, fontweight='bold')
-ax.set_title('NFL Team Home vs Away Win Percentages (2004-2024 Regular Season)\nAveraged Across Seasons, Ordered by Overall Win %',
+ax.set_title('NFL Team Home vs Away Win Percentages (2004-2025 Regular Season)\nAveraged Across Seasons, Ordered by Overall Win %',
              fontsize=13, fontweight='bold', pad=20)
 ax.set_xlim(0, 0.8)
 ax.grid(axis='x', alpha=0.3, linestyle='--')
 ax.legend(loc='lower right', fontsize=10)
 
 plt.tight_layout()
-plt.savefig('nfl_team_home_away_win_pct_2004_2024.png', dpi=300, bbox_inches='tight')
-print("✓ Chart saved as: nfl_team_home_away_win_pct_2004_2024.png")
+plt.savefig('nfl_team_home_away_win_pct_2004_2025.png', dpi=300, bbox_inches='tight')
+print("✓ Chart saved as: nfl_team_home_away_win_pct_2004_2025.png")
 
 # Print summary statistics
 print("\n" + "="*70)

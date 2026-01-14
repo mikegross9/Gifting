@@ -6,7 +6,7 @@ Create summary spreadsheet with team win percentages and home/away index
 import pandas as pd
 
 # Read the data
-df = pd.read_csv('nfl_team_season_home_away_2004_2024.csv')
+df = pd.read_csv('nfl_team_season_home_away_2004_2025.csv')
 
 # Sum up total wins/losses/ties across all seasons for each team
 team_totals = df.groupby('team').agg({
@@ -61,13 +61,13 @@ summary = team_totals[[
 summary = summary.sort_values('total_win_pct', ascending=False).reset_index(drop=True)
 
 # Save to CSV
-output_file = 'nfl_team_summary_2004_2024.csv'
+output_file = 'nfl_team_summary_2004_2025.csv'
 summary.to_csv(output_file, index=False)
 print(f"✓ Saved to {output_file}")
 
 # Display the data
 print("\n" + "="*120)
-print("NFL TEAM SUMMARY (2004-2024)")
+print("NFL TEAM SUMMARY (2004-2025)")
 print("="*120)
 print(f"{'Team':<6} {'Total W%':<10} {'Home W%':<10} {'Away W%':<10} {'Index':<8} {'Record':<15} {'Home':<12} {'Away':<12}")
 print("-"*120)

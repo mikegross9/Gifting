@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pull NFL team-season home/away W-L-T splits for 2004-2024 regular season.
+Pull NFL team-season home/away W-L-T splits for 2004-2025 regular season.
 Uses nflfastR public data.
 """
 
@@ -21,9 +21,9 @@ def main():
         df = pd.read_csv(StringIO(response.text), low_memory=False)
         print(f"Loaded {len(df)} games")
 
-        # Filter to regular season only and seasons 2004-2024
-        df = df[(df['season'] >= 2004) & (df['season'] <= 2024) & (df['game_type'] == 'REG')]
-        print(f"Filtered to {len(df)} regular season games (2004-2024)")
+        # Filter to regular season only and seasons 2004-2025
+        df = df[(df['season'] >= 2004) & (df['season'] <= 2025) & (df['game_type'] == 'REG')]
+        print(f"Filtered to {len(df)} regular season games (2004-2025)")
 
         # Initialize results dictionary
         results = {}
@@ -77,7 +77,7 @@ def main():
         output_df = output_df.sort_values(['season', 'team']).reset_index(drop=True)
 
         # Save to CSV
-        output_file = 'nfl_team_season_home_away_2004_2024.csv'
+        output_file = 'nfl_team_season_home_away_2004_2025.csv'
         output_df.to_csv(output_file, index=False)
         print(f"\n✓ Saved to {output_file}")
 

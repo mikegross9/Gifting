@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Create bar chart of NFL team home/away win percentage index 2004-2024
+Create bar chart of NFL team home/away win percentage index 2004-2025
 Index = (Home Win %) / (Away Win %) per season, then averaged across seasons
 """
 
@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Read the data
-df = pd.read_csv('nfl_team_season_home_away_2004_2024.csv')
+df = pd.read_csv('nfl_team_season_home_away_2004_2025.csv')
 
 # Sum up total wins/losses/ties across all seasons for each team
 team_totals = df.groupby('team').agg({
@@ -58,7 +58,7 @@ ax.axvline(x=1.0, color='red', linestyle='--', linewidth=2, alpha=0.7, label='1.
 
 ax.set_xlabel('Home/Away Win % Index', fontsize=12, fontweight='bold')
 ax.set_ylabel('Team', fontsize=12, fontweight='bold')
-ax.set_title('NFL Team Home/Away Win % Index (2004-2024)\nIndex = (Home Win %) / (Away Win %) averaged across seasons\nHigher = Stronger Home Field Advantage',
+ax.set_title('NFL Team Home/Away Win % Index (2004-2025)\nIndex = (Home Win %) / (Away Win %) averaged across seasons\nHigher = Stronger Home Field Advantage',
           fontsize=13, fontweight='bold', pad=20)
 ax.set_xlim(0, 2.5)
 ax.grid(axis='x', alpha=0.3, linestyle='--')
@@ -66,8 +66,8 @@ ax.legend(loc='lower right', fontsize=10)
 fig.tight_layout()
 
 # Save the chart
-plt.savefig('nfl_team_home_away_index_2004_2024.png', dpi=300, bbox_inches='tight')
-print("✓ Chart saved as: nfl_team_home_away_index_2004_2024.png")
+plt.savefig('nfl_team_home_away_index_2004_2025.png', dpi=300, bbox_inches='tight')
+print("✓ Chart saved as: nfl_team_home_away_index_2004_2025.png")
 
 # Print summary statistics
 print("\n" + "="*75)
