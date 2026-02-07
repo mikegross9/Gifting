@@ -4,7 +4,7 @@ services:
     env: node
     region: oregon
     plan: free
-    buildCommand: cd backend && npm install && npx prisma generate && npm run build
+    buildCommand: cd backend && npm install && npx prisma generate && npx prisma db push --accept-data-loss && npm run build
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
@@ -27,7 +27,7 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://gift-planner-backend.onrender.com
+        value: https://gifting-backend-wdyz.onrender.com
 
 databases:
   - name: gift-planner-db
